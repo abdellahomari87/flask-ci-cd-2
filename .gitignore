@@ -1,0 +1,13 @@
+# Terraform
+**/.terraform/
+**/.terraform/*
+**/*.tfstate
+**/*.tfstate.*
+crash.log
+crash.*
+terraform.tfvars
+*.tfvars.json
+
+# Autres classiques
+.DS_Store
+*.log

@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-auth
+  namespace: kube-system
+data:
+  mapRoles: |
+    # Rôle des nœuds (garde tel quel)
+    - rolearn: arn:aws:iam::600897147573:role/eksNodeRole
+      username: system:node:{{EC2PrivateDNSName}}
+      groups:
+        - system:bootstrappers
+        - system:nodes
+
+    # Admins (cluster-admin) — adapte l'ARN ou supprime si tu n'as pas ce rôle
+    - rolearn: arn:aws:iam::600897147573:role/eks-admin
+      username: eks-admin
+      groups:
+        - system:masters
+
+    # Développeurs (liés à tes RoleBinding du groupe "devs")
+    - rolearn: arn:aws:iam::600897147573:role/eks-devs
+      username: eks-devs
+      groups:
+        - devs
+
+  # Si tu utilises un **utilisateur** IAM (ex: abdellah), ajoute ce bloc :
+  mapUsers: |
+    - userarn: arn:aws:iam::600897147573:user/abdou1
+      username: abdou1
+      groups:
+        - devs
+
