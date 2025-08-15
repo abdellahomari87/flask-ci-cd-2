@@ -1,29 +1,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: flask-deployment
+  name: swiggy-frontend
   labels:
-    app: flask
+    app: swiggy-frontend
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
-      app: flask-ci-cd
+      app: swiggy-frontend
   template:
     metadata:
       labels:
-        app: flask-ci-cd
+        app: swiggy-frontend
     spec:
-      automountServiceAccountToken: false
       containers:
-        - name: flask-container
-          image: omari87/flask-ci-cd:latest
+        - name: app
+          image: <AWS_ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/swiggy-clone:v1.0.0
           ports:
-            - containerPort: 5000
-          resources:
-            limits:
-              memory: "256Mi"
-              cpu: "500m"
-            requests:
-              memory: "128Mi"
-              cpu: "250m"
+            - containerPort: 80
+          readinessProbe:
+            httpGet: { path: "/", port: 80 }
+            initialDelaySeconds: 5
+          livenessProbe:
+            httpGet: { path: "/", port: 80 }
+            initialDelaySeconds: 15
