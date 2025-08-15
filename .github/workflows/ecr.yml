@@ -1,0 +1,29 @@
+name: Build & Push to ECR
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - uses: aws-actions/amazon-ecr-login@v2
+        id: ecr
+      - name: Build, tag, push
+        run: |
+          REPO_NAME=swiggy-clone
+          TAG=v1.0.0
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          aws ecr describe-repositories --repository-names $REPO_NAME || aws ecr create-repository --repository-name $REPO_NAME
+          docker build -t $REPO_NAME:$TAG .
+          docker tag $REPO_NAME:$TAG $ACCOUNT_ID.dkr.ecr.${{ env.AWS_REGION || 'us-east-1' }}.amazonaws.com/$REPO_NAME:$TAG
+          docker push $ACCOUNT_ID.dkr.ecr.${{ env.AWS_REGION || 'us-east-1' }}.amazonaws.com/$REPO_NAME:$TAG
